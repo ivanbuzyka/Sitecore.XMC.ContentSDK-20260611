@@ -1,0 +1,17 @@
+---
+ID: "18e8f49e-3ce9-4a94-b2e7-2f3a7c3e2d6d"
+Parent: "a722122a-181d-4660-8b33-6a86d76f34f5"
+Template: "ab86861a-6030-46c5-b394-e8f99e8b87db"
+Path: "/sitecore/templates/Project/click-click-launch/Edit Mode Rendering Exclusions"
+SharedFields:
+- ID: "f7d48a55-2158-4f02-9356-756654404f73"
+  Hint: __Standard values
+  Value: "{0B2D66A6-BC4A-4C80-95C1-6A4A2F5EB4A4}"
+Languages:
+- Language: en
+  Versions:
+  - Version: 1
+    Fields:
+    - ID: "25bed78c-4957-4165-998a-ca1b52f67497"
+      Hint: __Created
+      Value: 20260905T000000Z

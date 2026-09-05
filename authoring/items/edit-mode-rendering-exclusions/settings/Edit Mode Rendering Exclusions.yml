@@ -1,0 +1,13 @@
+---
+ID: "7d0c4e4d-6f66-4e54-9c8c-4bf8b7757a7d"
+Parent: "419921d1-bbba-49ae-b78c-863915bea84c"
+Template: "18e8f49e-3ce9-4a94-b2e7-2f3a7c3e2d6d"
+Path: "/sitecore/system/Settings/Project/click-click-launch/Edit Mode Rendering Exclusions"
+Languages:
+- Language: en
+  Versions:
+  - Version: 1
+    Fields:
+    - ID: "25bed78c-4957-4165-998a-ca1b52f67497"
+      Hint: __Created
+      Value: 20260905T000000Z

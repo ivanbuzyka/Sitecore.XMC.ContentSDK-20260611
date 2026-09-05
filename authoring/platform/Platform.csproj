@@ -65,7 +65,11 @@
     <PackageReference Include="Sitecore.Assemblies.SitecoreHeadlessServicesServer" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Pipelines\RenderRendering\SkipRenderingsInEditMode.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Platform.wpp.targets" />
+    <Content Include="App_Config\Include\**\*" />
     <None Include="Properties\PublishProfiles\Local.pubxml" />
     <None Include="README.md" />
     <None Include="web.config" />
