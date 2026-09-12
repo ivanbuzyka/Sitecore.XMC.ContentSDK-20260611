@@ -1,5 +1,6 @@
 import scConfig from 'sitecore.config';
 import client from '@/lib/sitecore-client';
+import { getPreviewFetchOptions } from '@/lib/sitecore-preview-auth';
 
 const FAQ_GRAPHQL_TYPE = 'AIFAQItem';
 const FAQ_DATA_PATH_SUFFIX = '/Data/AI Config/FAQ';
@@ -74,9 +75,12 @@ export async function fetchFaqFromEdge(): Promise<FaqEdgeResult> {
   const language = scConfig.defaultLanguage || 'en';
 
   try {
+    // Forward the Page Builder preview JWT (if present) so permission-restricted items resolve correctly while previewing
+    const fetchOptions = await getPreviewFetchOptions();
     const result = await client.getData<FaqQueryResult>(
       buildFaqQuery(FAQ_GRAPHQL_TYPE),
-      { path, language }
+      { path, language },
+      fetchOptions
     );
 
     const items = (result?.item?.children?.results ?? [])

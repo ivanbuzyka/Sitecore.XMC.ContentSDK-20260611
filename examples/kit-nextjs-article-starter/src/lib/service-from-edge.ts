@@ -1,5 +1,6 @@
 import scConfig from 'sitecore.config';
 import client from '@/lib/sitecore-client';
+import { getPreviewFetchOptions } from '@/lib/sitecore-preview-auth';
 
 const SERVICE_GRAPHQL_TYPE = 'AIService';
 const SERVICE_DATA_PATH_SUFFIX = '/Data/AI Config/Services';
@@ -77,9 +78,12 @@ export async function fetchServicesFromEdge(): Promise<ServiceEdgeResult> {
   const language = scConfig.defaultLanguage || 'en';
 
   try {
+    // Forward the Page Builder preview JWT (if present) so permission-restricted items resolve correctly while previewing
+    const fetchOptions = await getPreviewFetchOptions();
     const result = await client.getData<ServiceQueryResult>(
       buildServiceQuery(SERVICE_GRAPHQL_TYPE),
-      { path, language }
+      { path, language },
+      fetchOptions
     );
 
     const services = (result?.item?.children?.results ?? [])

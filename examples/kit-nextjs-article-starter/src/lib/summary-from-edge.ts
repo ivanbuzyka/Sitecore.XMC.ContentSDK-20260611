@@ -1,5 +1,6 @@
 import scConfig from 'sitecore.config';
 import client from '@/lib/sitecore-client';
+import { getPreviewFetchOptions } from '@/lib/sitecore-preview-auth';
 
 const SUMMARY_GRAPHQL_TYPE = 'AISummary';
 const SUMMARY_DATA_PATH_SUFFIX = '/Data/AI Config/Summary';
@@ -56,9 +57,12 @@ export async function fetchSummaryFromEdge(): Promise<SummaryItem | null> {
   const language = scConfig.defaultLanguage || 'en';
 
   try {
+    // Forward the Page Builder preview JWT (if present) so permission-restricted items resolve correctly while previewing
+    const fetchOptions = await getPreviewFetchOptions();
     const result = await client.getData<SummaryQueryResult>(
       buildSummaryQuery(SUMMARY_GRAPHQL_TYPE),
-      { path, language }
+      { path, language },
+      fetchOptions
     );
 
     if (!result?.item) return null;

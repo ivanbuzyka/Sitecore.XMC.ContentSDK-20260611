@@ -49,3 +49,6 @@ packages/
 
 # VS Code settings
 .vscode/
+
+# Local workaround documentation for Content SDK v2.1.1 and later
+/Workaround-description-for-Content SDK v2.1.1 and later/

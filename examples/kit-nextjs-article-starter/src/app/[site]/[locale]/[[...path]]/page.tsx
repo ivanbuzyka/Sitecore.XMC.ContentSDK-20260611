@@ -6,6 +6,7 @@ import sites from '.sitecore/sites.json';
 import { routing } from '@/i18n/routing';
 import scConfig from 'sitecore.config';
 import client from '@/lib/sitecore-client';
+import { getPreviewFetchOptions } from '@/lib/sitecore-preview-auth';
 import Layout, { RouteFields } from '@/Layout';
 import Providers from '@/Providers';
 import { NextIntlClientProvider } from 'next-intl';
@@ -36,10 +37,12 @@ export default async function Page({ params }: PageProps) {
   if (draft.isEnabled) {
     const headers = await nextHeaders();
     const previewData = client.getPreviewData(headers);
+    // Forward the preview JWT so permission-restricted datasources are respected while previewing
+    const fetchOptions = await getPreviewFetchOptions();
     if (isDesignLibraryPreviewData(previewData)) {
-      page = await client.getDesignLibraryData(previewData);
+      page = await client.getDesignLibraryData(previewData, fetchOptions);
     } else {
-      page = await client.getPreview(previewData);
+      page = await client.getPreview(previewData, fetchOptions);
     }
   } else {
     page = await client.getPage(path ?? [], { site, locale });
