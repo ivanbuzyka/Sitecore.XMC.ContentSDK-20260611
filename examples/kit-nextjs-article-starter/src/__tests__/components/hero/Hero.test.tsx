@@ -499,24 +499,30 @@ describe('Hero Component', () => {
   });
 
   describe('Edge cases and fallbacks', () => {
-    it('should render NoDataFallback when fields is null', () => {
-      render(<Hero {...propsWithoutFields} />);
+    it('should render restricted-content fallback in editing mode when fields is null', () => {
+      render(
+        <Hero
+          {...propsWithoutFields}
+          page={{ ...propsWithoutFields.page, mode: { ...propsWithoutFields.page.mode, isEditing: true } }}
+        />
+      );
 
       const fallback = screen.getByTestId('no-data-fallback');
       expect(fallback).toBeInTheDocument();
       expect(fallback).toHaveTextContent('Hero');
     });
 
-    it('should render NoDataFallback when fields is undefined', () => {
+    it('should render nothing on the live site when fields is undefined', () => {
       const propsWithUndefinedFields = {
         ...defaultProps,
         fields: undefined as unknown as HeroProps['fields'],
       };
 
-      render(<Hero {...propsWithUndefinedFields} />);
+      const { container } = render(<Hero {...propsWithUndefinedFields} />);
 
-      const fallback = screen.getByTestId('no-data-fallback');
-      expect(fallback).toBeInTheDocument();
+      const fallback = screen.queryByTestId('no-data-fallback');
+      expect(fallback).not.toBeInTheDocument();
+      expect(container).toBeEmptyDOMElement();
     });
   });
 

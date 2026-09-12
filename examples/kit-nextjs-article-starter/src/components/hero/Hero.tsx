@@ -163,5 +163,10 @@ export const Default: React.FC<HeroProps> = ({ fields, params, page }) => {
     );
   }
 
-  return <NoDataFallback componentName="Hero" />;
+  return isPageEditing ? (
+    <NoDataFallback
+      componentName="Hero"
+      message="This component contains restricted content."
+    />
+  ) : null;
 };
