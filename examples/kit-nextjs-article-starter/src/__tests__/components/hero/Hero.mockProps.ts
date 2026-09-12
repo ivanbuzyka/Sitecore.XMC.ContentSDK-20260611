@@ -231,6 +231,11 @@ export const mockParamsWithoutColorScheme = {
 // Mock rendering
 const mockRendering: ComponentRendering = {
   componentName: 'Hero',
+  dataSource: '/sitecore/content/solterra/home/hero',
+};
+
+const mockRenderingWithoutDatasource: ComponentRendering = {
+  componentName: 'Hero',
 };
 
 // Complete props combinations
@@ -308,6 +313,13 @@ export const propsWithoutFields: HeroProps = {
   params: mockParamsLight,
   fields: null as unknown as HeroProps['fields'],
   rendering: mockRendering,
+  page: mockPageData.page,
+};
+
+export const propsWithoutFieldsOrDatasource: HeroProps = {
+  params: mockParamsLight,
+  fields: null as unknown as HeroProps['fields'],
+  rendering: mockRenderingWithoutDatasource,
   page: mockPageData.page,
 };
 

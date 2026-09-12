@@ -28,8 +28,10 @@ export const heroVariants = cva('hero @container py-24 relative w-full overflow-
   },
 });
 
-export const Default: React.FC<HeroProps> = ({ fields, params, page }) => {
+export const Default: React.FC<HeroProps> = ({ fields, params, page, rendering }) => {
   // Destructure fields and params
+  const hasDatasourceReference = Boolean(rendering?.dataSource);
+  const hasDatasourceFields = Boolean(fields?.titleRequired);
 
   const {
     titleRequired,
@@ -58,7 +60,7 @@ export const Default: React.FC<HeroProps> = ({ fields, params, page }) => {
     setIsPlaying(!mediaQuery.matches);
   }, []);
 
-  if (fields) {
+  if (hasDatasourceFields) {
     return (
       <section className={cn(heroVariants({ colorScheme }), [params?.styles && params.styles])}>
         <div className="grid gap-20">
@@ -166,7 +168,11 @@ export const Default: React.FC<HeroProps> = ({ fields, params, page }) => {
   return isPageEditing ? (
     <NoDataFallback
       componentName="Hero"
-      message="This component contains restricted content."
+      message={
+        hasDatasourceReference
+          ? 'This component contains restricted content.'
+          : undefined
+      }
     />
   ) : null;
 };

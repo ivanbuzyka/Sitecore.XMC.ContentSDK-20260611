@@ -13,6 +13,7 @@ import {
   propsWithImagesOnly,
   propsWithoutColorScheme,
   propsWithoutFields,
+  propsWithoutFieldsOrDatasource,
   propsEditing,
   mockPageData,
   mockPageDataEditing,
@@ -58,6 +59,7 @@ interface MockButtonProps {
 
 interface MockNoDataFallbackProps {
   componentName?: string;
+  message?: string;
 }
 
 // Mock the cn utility
@@ -156,8 +158,10 @@ jest.mock('lucide-react', () => ({
 
 // Mock NoDataFallback
 jest.mock('@/utils/NoDataFallback', () => ({
-  NoDataFallback: ({ componentName }: MockNoDataFallbackProps) => (
-    <div data-testid="no-data-fallback">{componentName}</div>
+  NoDataFallback: ({ componentName, message }: MockNoDataFallbackProps) => (
+    <div data-testid="no-data-fallback">
+      {message || `${componentName} requires a datasource item assigned.`}
+    </div>
   ),
 }));
 
@@ -509,7 +513,7 @@ describe('Hero Component', () => {
 
       const fallback = screen.getByTestId('no-data-fallback');
       expect(fallback).toBeInTheDocument();
-      expect(fallback).toHaveTextContent('Hero');
+      expect(fallback).toHaveTextContent('This component contains restricted content.');
     });
 
     it('should render nothing on the live site when fields is undefined', () => {
@@ -523,6 +527,37 @@ describe('Hero Component', () => {
       const fallback = screen.queryByTestId('no-data-fallback');
       expect(fallback).not.toBeInTheDocument();
       expect(container).toBeEmptyDOMElement();
+    });
+
+    it('should render the editing fallback when the SDK returns empty fields', () => {
+      const propsWithEmptyFields = {
+        ...defaultProps,
+        fields: {} as HeroProps['fields'],
+        page: {
+          ...defaultProps.page,
+          mode: { ...defaultProps.page.mode, isEditing: true },
+        },
+      };
+
+      render(<Hero {...propsWithEmptyFields} />);
+
+      expect(screen.getByTestId('no-data-fallback')).toBeInTheDocument();
+    });
+
+    it('should render the datasource-required fallback in editing mode when no datasource is assigned', () => {
+      render(
+        <Hero
+          {...propsWithoutFieldsOrDatasource}
+          page={{
+            ...propsWithoutFieldsOrDatasource.page,
+            mode: { ...propsWithoutFieldsOrDatasource.page.mode, isEditing: true },
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('no-data-fallback')).toHaveTextContent(
+        'Hero requires a datasource item assigned.'
+      );
     });
   });
 
