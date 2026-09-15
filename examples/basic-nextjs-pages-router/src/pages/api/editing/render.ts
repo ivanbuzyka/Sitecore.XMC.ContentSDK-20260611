@@ -22,7 +22,12 @@ export const config = {
   },
 };
 
-// Wire up the EditingRenderMiddleware handler
-const handler = new EditingRenderMiddleware().getHandler();
+// Redirect editing requests to the SSR-based _preview route so the sc_preview_token
+// cookie/JWT can be read (see "Workaround-description-for-Content SDK v2.1.1 and later").
+const handler = new EditingRenderMiddleware({
+  resolvePageUrl: (itemPath) => {
+    return `/_preview${itemPath}`;
+  },
+}).getHandler();
 
 export default handler;

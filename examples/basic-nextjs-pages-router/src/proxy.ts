@@ -3,10 +3,13 @@ import {
   defineProxy,
   MultisiteProxy,
   PersonalizeProxy,
+  PreviewProxy,
   RedirectsProxy,
+  ProxyHandler,
 } from '@sitecore-content-sdk/nextjs/proxy';
 import sites from '.sitecore/sites.json';
 import scConfig from 'sitecore.config';
+import client from './lib/sitecore-client';
 
 export default function proxy(req: NextRequest) {
   // If no Edge server contextId, skip Edge middlewares entirely.
@@ -14,6 +17,14 @@ export default function proxy(req: NextRequest) {
   if (!scConfig.api?.edge?.contextId) {
     return NextResponse.next();
   }
+
+  // PreviewProxy authorizes preview requests (rejects direct Editing Host links to pages
+  // the current user does not have permission to access).
+  // See "Workaround-description-for-Content SDK v2.1.1 and later" at the repo root.
+  const preview = new PreviewProxy({
+    client,
+    ...scConfig.api.edge,
+  });
 
   // Instantiate AFTER the guard so constructors don’t run in local-only mode
   const multisite = new MultisiteProxy({
@@ -57,7 +68,34 @@ export default function proxy(req: NextRequest) {
     skip: () => false,
   });
 
-  return defineProxy(multisite, redirects, personalize).exec(req);
+  // Rewrites requests coming from the Page Builder preview environment (internal editing
+  // host) so they render via _preview/[[...path]].tsx (SSR) instead of [[...path]].tsx
+  // (SSG/ISR). SSR is required to be able to read the sc_preview_token cookie/JWT.
+  const previewRewrite = new (class implements ProxyHandler {
+    handle = async (req: NextRequest, res: NextResponse): Promise<NextResponse> => {
+      // Skip if not an internal editing host
+      if (!process.env.SITECORE) {
+        return res;
+      }
+
+      // Skip if the request comes from the api route
+      if (req.nextUrl.pathname.includes('/_preview')) {
+        return res;
+      }
+
+      // x-sc-rewrite header is set by content-sdk proxies
+      const currentRewritePath = res?.headers.get('x-sc-rewrite') || req.nextUrl.pathname;
+
+      const rewritePath = `/_preview${currentRewritePath}`;
+
+      const nextUrl = req.nextUrl.clone();
+      nextUrl.pathname = rewritePath;
+
+      return NextResponse.rewrite(nextUrl.href, res);
+    };
+  })();
+
+  return defineProxy(preview, multisite, redirects, personalize, previewRewrite).exec(req);
 }
 
 export const config = {
