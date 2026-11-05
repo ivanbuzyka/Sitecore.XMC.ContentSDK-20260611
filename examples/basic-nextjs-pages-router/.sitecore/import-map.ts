@@ -8,14 +8,14 @@ import {
 // end of built-in imports
 
 import { jsx, Fragment } from 'react/jsx-runtime';
-import { useEffect } from 'react';
-import React from 'react';
-import { RichText, Placeholder, CdpHelper, useSitecore } from '@sitecore-content-sdk/nextjs';
+import { RichText, useSitecore, Placeholder, CdpHelper } from '@sitecore-content-sdk/nextjs';
+import { NoDataFallback } from 'src/utils/NoDataFallback';
 import Head from 'next/head';
 import client from 'lib/sitecore-client';
 import Image from 'next/image';
 import * as FEAAS from '@sitecore-feaas/clientside/react';
 import nextConfig from 'next.config';
+import { useEffect } from 'react';
 import { pageView } from '@sitecore-content-sdk/events';
 import config from 'sitecore.config';
 
@@ -28,19 +28,18 @@ const importMap = [
     ]
   },
   {
-    module: 'react',
-    exports: [
-      { name: 'useEffect', value: useEffect },
-      { name: 'default', value: React },
-    ]
-  },
-  {
     module: '@sitecore-content-sdk/nextjs',
     exports: [
       { name: 'RichText', value: RichText },
+      { name: 'useSitecore', value: useSitecore },
       { name: 'Placeholder', value: Placeholder },
       { name: 'CdpHelper', value: CdpHelper },
-      { name: 'useSitecore', value: useSitecore },
+    ]
+  },
+  {
+    module: 'src/utils/NoDataFallback',
+    exports: [
+      { name: 'NoDataFallback', value: NoDataFallback },
     ]
   },
   {
@@ -71,6 +70,12 @@ const importMap = [
     module: 'next.config',
     exports: [
       { name: 'default', value: nextConfig },
+    ]
+  },
+  {
+    module: 'react',
+    exports: [
+      { name: 'useEffect', value: useEffect },
     ]
   },
   {
