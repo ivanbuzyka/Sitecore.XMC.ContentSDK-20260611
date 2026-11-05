@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import sites from '.sitecore/sites.json';
+import generatedSites from '.sitecore/sites.json';
+
+const sites: { hostName?: string }[] = generatedSites;
 
 export const dynamic = 'force-dynamic';
 
