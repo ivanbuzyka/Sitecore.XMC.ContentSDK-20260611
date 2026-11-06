@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Default as RichTextBlock } from '@/components/rich-text-block/RichTextBlock';
+import type { RichTextBlockProps } from '@/components/rich-text-block/rich-text-block.props';
 import {
   defaultProps,
   propsWithoutFields,
@@ -12,6 +13,10 @@ import {
   propsWithComplexHtml,
   propsWithMultipleStyles,
 } from './RichTextBlock.mockProps';
+
+const editingPage = {
+  mode: { isEditing: true },
+} as unknown as RichTextBlockProps['page'];
 
 // Mock the cn utility
 jest.mock('@/lib/utils', () => ({
@@ -86,19 +91,49 @@ describe('RichTextBlock Component', () => {
   });
 
   describe('Rendering without fields', () => {
-    it('should render NoDataFallback when fields are not provided', () => {
-      render(<RichTextBlock {...propsWithoutFields} />);
+    it('should render nothing when fields are not provided outside editing mode', () => {
+      const { container } = render(<RichTextBlock {...propsWithoutFields} />);
 
-      expect(screen.getByTestId('no-data-fallback')).toBeInTheDocument();
+      expect(container).toBeEmptyDOMElement();
+    });
+
+    it('should render nothing when fields are null outside editing mode', () => {
+      const { container } = render(<RichTextBlock {...propsWithNullFields} />);
+
+      expect(container).toBeEmptyDOMElement();
+    });
+
+    it('should render NoDataFallback in editing mode when fields are not provided', () => {
+      render(<RichTextBlock {...propsWithoutFields} page={editingPage} />);
+
       expect(screen.getByTestId('no-data-fallback')).toHaveTextContent(
         'Rich Text Block requires a datasource item assigned.'
       );
     });
 
-    it('should render NoDataFallback when fields are null', () => {
-      render(<RichTextBlock {...propsWithNullFields} />);
+    it('should render restricted message in editing mode when datasource is referenced but unreadable', () => {
+      render(
+        <RichTextBlock
+          {...propsWithoutFields}
+          page={editingPage}
+          rendering={{ componentName: 'RichTextBlock', dataSource: 'restricted-item-id' }}
+        />
+      );
 
-      expect(screen.getByTestId('no-data-fallback')).toBeInTheDocument();
+      expect(screen.getByTestId('no-data-fallback')).toHaveTextContent(
+        'This component contains restricted content.'
+      );
+    });
+
+    it('should render nothing for restricted datasource outside editing mode', () => {
+      const { container } = render(
+        <RichTextBlock
+          {...propsWithoutFields}
+          rendering={{ componentName: 'RichTextBlock', dataSource: 'restricted-item-id' }}
+        />
+      );
+
+      expect(container).toBeEmptyDOMElement();
     });
   });
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Default as RichText } from '@/components/sxa/RichText';
+import type { RichTextProps } from '@/components/sxa/RichText';
 import type { Field } from '@sitecore-content-sdk/nextjs';
 import {
   defaultProps,
@@ -20,6 +21,10 @@ import {
 interface MockRichTextProps {
   field?: Field<string>;
 }
+
+const editingPage = {
+  mode: { isEditing: true },
+} as unknown as RichTextProps['page'];
 
 // Mock Sitecore SDK RichText component
 jest.mock('@sitecore-content-sdk/nextjs', () => ({
@@ -135,57 +140,63 @@ describe('RichText Component', () => {
   });
 
   describe('Fallback rendering', () => {
-    it('should render fallback when fields is missing', () => {
+    it('should render nothing when fields is missing outside editing mode', () => {
       const { container } = render(<RichText {...propsWithoutFields} />);
 
-      const richText = container.querySelector('.component.rich-text');
-      expect(richText).toBeInTheDocument();
-
-      const componentContent = richText?.querySelector('.component-content');
-      const fallback = componentContent?.querySelector('.is-empty-hint');
-      expect(fallback).toBeInTheDocument();
-      expect(fallback).toHaveTextContent('Rich text');
+      expect(container).toBeEmptyDOMElement();
     });
 
-    it('should render fallback when fields is null', () => {
+    it('should render nothing when fields is null outside editing mode', () => {
       const { container } = render(<RichText {...propsWithNullFields} />);
 
-      const componentContent = container.querySelector('.component-content');
-      const fallback = componentContent?.querySelector('.is-empty-hint');
-      expect(fallback).toBeInTheDocument();
-      expect(fallback).toHaveTextContent('Rich text');
+      expect(container).toBeEmptyDOMElement();
     });
 
-    it('should render RichText SDK component when Text field is missing', () => {
-      render(<RichText {...propsWithoutTextField} />);
+    it('should render NoDataFallback in editing mode when fields is missing', () => {
+      render(<RichText {...propsWithoutFields} page={editingPage} />);
 
-      // Component renders RichText SDK even without Text field
-      const richTextContent = screen.getByTestId('rich-text-content');
-      expect(richTextContent).toBeInTheDocument();
+      expect(screen.getByTestId('no-data-fallback')).toHaveTextContent(
+        'Rich Text requires a datasource item assigned.'
+      );
     });
 
-    it('should render RichText SDK component when Text field is null', () => {
-      render(<RichText {...propsWithNullTextField} />);
+    it('should render restricted message in editing mode when datasource is referenced but unreadable', () => {
+      render(
+        <RichText
+          {...propsWithoutFields}
+          page={editingPage}
+          rendering={{ componentName: 'RichText', dataSource: 'restricted-item-id' }}
+        />
+      );
 
-      // Component renders RichText SDK even when Text field is null
-      const richTextContent = screen.getByTestId('rich-text-content');
-      expect(richTextContent).toBeInTheDocument();
+      expect(screen.getByTestId('no-data-fallback')).toHaveTextContent(
+        'This component contains restricted content.'
+      );
     });
 
-    it('should render fallback with correct structure', () => {
-      const { container } = render(<RichText {...propsWithoutFields} />);
+    it('should render nothing for restricted datasource outside editing mode', () => {
+      const { container } = render(
+        <RichText
+          {...propsWithoutFields}
+          rendering={{ componentName: 'RichText', dataSource: 'restricted-item-id' }}
+        />
+      );
 
-      const richText = container.querySelector('.component.rich-text');
-      expect(richText).toHaveClass('no-fields-style');
-      expect(richText).toHaveAttribute('id', 'no-fields-id');
-
-      const componentContent = richText?.querySelector('.component-content');
-      expect(componentContent).toBeInTheDocument();
-
-      const fallback = componentContent?.querySelector('.is-empty-hint');
-      expect(fallback?.tagName).toBe('SPAN');
-      expect(fallback).toHaveClass('is-empty-hint');
+      expect(container).toBeEmptyDOMElement();
     });
+
+    it('should render nothing when Text field is missing outside editing mode', () => {
+      const { container } = render(<RichText {...propsWithoutTextField} />);
+
+      expect(container).toBeEmptyDOMElement();
+    });
+
+    it('should render nothing when Text field is null outside editing mode', () => {
+      const { container } = render(<RichText {...propsWithNullTextField} />);
+
+      expect(container).toBeEmptyDOMElement();
+    });
+
   });
 
   describe('Empty content handling', () => {
@@ -286,13 +297,6 @@ describe('RichText Component', () => {
 
       const richText = container.querySelector('.component.rich-text');
       expect(richText).toHaveClass('custom-rich-text-style');
-    });
-
-    it('should apply is-empty-hint class to fallback', () => {
-      const { container } = render(<RichText {...propsWithoutFields} />);
-
-      const fallback = container.querySelector('.is-empty-hint');
-      expect(fallback).toHaveClass('is-empty-hint');
     });
 
     it('should not have undefined in className', () => {

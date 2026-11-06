@@ -55,9 +55,9 @@ jest.mock('@/lib/utils', () => ({
 
 // Mock NoDataFallback component
 jest.mock('@/utils/NoDataFallback', () => ({
-  NoDataFallback: ({ componentName }) => 
+  NoDataFallback: ({ componentName, message }) => 
     React.createElement('div', { 'data-testid': 'no-data-fallback' }, 
-      `${componentName} requires a datasource item assigned.`
+      message ?? `${componentName} requires a datasource item assigned.`
     ),
 }));
 
